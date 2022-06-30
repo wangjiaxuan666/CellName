@@ -2,10 +2,9 @@
 import os
 import numpy as np
 import pandas as pd
-import adobo as ad
 import collections
 from sklearn.preprocessing import scale as sklearn_scale
-from .util import p_adjust_bh, _guess_cell_type
+from .util import p_adjust_bh, _guess_cell_type,standard
 
 
 def predict_celltype(obj, cell_type_markers=None, clusters="leiden", q=0.75, qv=0.1):
@@ -22,8 +21,8 @@ def predict_celltype(obj, cell_type_markers=None, clusters="leiden", q=0.75, qv=
         ma_ss = cell_type_markers
         ma_ss.columns = ['official gene symbol', 'cell type']
     else:
-        ma = pd.read_csv('%s/data/markers.tsv' %
-                         os.path.dirname(ad.IO.__file__), sep='\t')
+        ma = pd.read_csv('%s/../data/markers.tsv' %
+                         os.path.dirname(__file__), sep='\t')
         # restrict to mouse
         # ma = ma[ma.species.str.match('Hs')]
         markers = ma
@@ -47,12 +46,11 @@ def predict_celltype(obj, cell_type_markers=None, clusters="leiden", q=0.75, qv=
     t = obj.raw.X.toarray()
     t_pd = pd.DataFrame(data=t, index=obj.raw.obs_names, columns=obj.raw.var_names)
     df = t_pd.transpose()
-    exp = ad.dataset(df)
-    ad.normalize.norm(exp, method='standard')
-    X = exp.norm_data['standard']['data']
+    norm = standard(df)
+    X = np.log2(norm + 1)
     min_cluster_size = 10
     cl = obj.obs[clusters]
-    ret = X.sparse.to_dense().groupby(cl.values, axis=1).quantile(q)
+    ret = X.groupby(cl.values, axis=1).quantile(q)
     q = pd.Series(cl).value_counts()
     cl_remove = q[q < min_cluster_size].index
     ret = ret.iloc[:, np.logical_not(ret.columns.isin(cl_remove))]

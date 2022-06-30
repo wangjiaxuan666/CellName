@@ -69,3 +69,28 @@ def _guess_cell_type(x, median_expr, dd, weights):
                     'markers': markers_found})
     res = sorted(res, key=lambda k: k['activity_score'], reverse=True)
     return res
+
+def standard(data, scaling_factor=10000):
+    """Performs a standard normalization by scaling with the total
+    read depth per cell and then multiplying with a scaling factor.
+    Parameters
+    ----------
+    data : :class:`pandas.DataFrame`
+        A pandas data frame object containing raw read counts
+        (rows=genes, columns=cells).
+    scaling_factor : `int`
+        Scaling factor used to multiply the scaled counts
+        with. Default: 10000
+    References
+    ----------
+    .. [1] Evans et al. (2018) Briefings in Bioinformatics
+           https://academic.oup.com/bib/article/19/5/776/3056951
+    .. [2] https://github.com/oscar-franzen/adobo/blob/ee3362eaef1e311a81ceb6e4a272721de420bae6/adobo/normalize.py#L256
+    Returns
+    -------
+    :class:`pandas.DataFrame`
+        A normalized data matrix with same dimensions as before.
+    """
+    col_sums = data.sum(axis=0).values
+    data_norm = (data / col_sums) * scaling_factor
+    return data_norm
