@@ -8,17 +8,23 @@ from .util import p_adjust_bh, _guess_cell_type,standard
 
 
 def predict_celltype(obj, cell_type_markers=None, clusters="leiden", q=0.75, qv=0.1):
-    '''
+    """
     change the code within adobo python packages:https://github.com/oscar-franzen/adobo/tree/master/adobo
     But the orgin code can't run sucess,and don't fit the BGI stereo-seq,So I have change some for bettter use!
+    :param qv: the Q value thresholds.
+    :param q: the percent gene is marker gene.
     :param obj: the anndata which scanpy use
     :param cell_type_markers: the pandas Dataframe which including marker gene and cell tyoe,two columns.
     :param clusters:which cluster you want to use in obj.obs
     :return a cell type annotation pandas Dataframe
-    '''
+    """
+
     if isinstance(cell_type_markers, pd.DataFrame):
         # custom cell type markers were provided
         ma_ss = cell_type_markers
+        ma_ss.columns = ['official gene symbol', 'cell type']
+    elif isinstance(cell_type_markers,str):
+        ma_ss = pd.read_csv(cell_type_markers,sep="\t")
         ma_ss.columns = ['official gene symbol', 'cell type']
     else:
         ma = pd.read_csv('%s/../data/markers.tsv' %

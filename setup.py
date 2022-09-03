@@ -37,8 +37,8 @@ setup(
     packages=find_packages(include=['cellname', 'cellname.*']),
     test_suite='tests',
     tests_require=test_requirements,
-    url='https://github.com/wangjiaxuan666/cellname',
-    version='0.1.0',
+    url='https://github.com/wangjiaxuan666/CellName',
+    version='0.3',
     zip_safe=False,
-    package_data={'cellname': [' data/s_scanpy.h5ad ']},
+    package_data={'cellname': [' data/s_scanpy.h5ad ','data/markers.tsv']},
 )
